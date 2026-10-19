@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AVIVA · Kit iPhone Sakura</title>
+<meta name="description" content="Kit de prueba para iPhone: fondo 3D, fotos aleatorias con mensajes, Live Photo y sorpresa de fecha.">
+<meta property="og:title" content="AVIVA · Kit iPhone Sakura">
+<meta property="og:description" content="Kit de prueba para iPhone: fondo 3D, fotos aleatorias con mensajes, Live Photo y sorpresa de fecha.">
+<meta property="og:image" content="sakura/escena_3d.jpg">
+<meta name="theme-color" content="#140d1c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..600;1,9..144,300..500&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Mismo mundo que el catálogo: noche ciruela; aquí la lectura es una guía paso a paso para hacer en el celular. */
+:root {
+  --night: #140d1c;
+  --night-2: #1d1428;
+  --line: #3a2c4a;
+  --ink: #f4ecf3;
+  --muted: #b3a3bb;
+  --rose: #ff8fa8;
+  --gold: #ffd49a;
+  --display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--night); color: var(--ink); font: 400 1rem/1.6 var(--body);
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.wrap {
+  max-width: 920px; margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+a { color: var(--rose); }
+header.top { padding-block: 22px 0; }
+.brand { display: flex; align-items: baseline; gap: 12px; text-decoration: none; color: var(--ink); }
+.brand b { font: 600 0.95rem/1 var(--body); letter-spacing: 0.42em; }
+.brand span { color: var(--muted); font-size: 0.85rem; }
+.eyebrow { color: var(--gold); font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; }
+h1 { font: 400 clamp(2.2rem, 6vw, 3.6rem)/1.05 var(--display); margin: 12px 0 16px; letter-spacing: -0.02em; text-wrap: balance; }
+h1 em { color: var(--rose); }
+h2 { font: 400 clamp(1.6rem, 4vw, 2.2rem)/1.15 var(--display); margin: 0 0 8px; text-wrap: balance; }
+.intro { padding-block: 40px 16px; }
+.intro p { color: var(--muted); max-width: 36em; margin: 0; font-size: 1.08rem; }
+.note { margin-top: 18px; border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; color: var(--muted); font-size: 0.95rem; }
+.note b { color: var(--ink); font-weight: 600; }
+
+section.part { padding-block: 40px; border-top: 1px solid var(--line); }
+.part-head { display: flex; gap: 16px; align-items: baseline; margin-bottom: 6px; }
+.part-head .n { font: 300 2.6rem/1 var(--display); color: var(--gold); min-width: 1.2em; }
+.part > .wrap > p.lead { color: var(--muted); margin: 0 0 22px; max-width: 38em; }
+.tag { display: inline-block; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+       border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--muted); margin-left: 6px; vertical-align: middle; }
+
+.shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+.shots.two { grid-template-columns: repeat(auto-fill, minmax(180px, 220px)); }
+.shot { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.shot img, .shot video {
+  display: block; width: 100%; max-width: 100%; aspect-ratio: 1290 / 2796; object-fit: cover;
+  border-radius: 16px; background: var(--night-2); border: 1px solid var(--line);
+}
+.shot span { font-size: 0.85rem; color: var(--muted); }
+.shot a.dl { font-size: 0.88rem; font-weight: 600; }
+
+ol.steps { margin: 22px 0 0; padding-left: 1.3em; max-width: 40em; }
+ol.steps li { margin-bottom: 8px; }
+ol.steps li::marker { color: var(--gold); font-weight: 600; }
+.ui { font-weight: 600; color: var(--ink); white-space: nowrap; }
+
+.check { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; max-width: 40em; }
+.check li { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--night-2); }
+.check li::before { content: "♡ "; color: var(--rose); }
+
+.zip { display: inline-flex; gap: 10px; align-items: center; margin-top: 18px; padding: 12px 18px; border-radius: 999px;
+       background: var(--ink); color: var(--night); font-weight: 600; text-decoration: none; }
+.zip:focus-visible, a:focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; }
+footer { padding-block: 32px 48px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.88rem; }
+</style>
+</head>
+<body>
+
+<header class="top"><a class="wrap brand" href="../"><b>AVIVA</b><span>Fondos Vivos</span></a></header>
+
+<div class="wrap intro">
+  <div class="eyebrow">Kit de prueba · iPhone</div>
+  <h1>Sakura para <em>iPhone</em></h1>
+  <p>El iPhone no deja poner un video de fondo, así que probamos lo que sí trae de fábrica. Ábrelo desde el iPhone, en Safari, y prueba las partes que quieras. Al final hay una lista de lo que nos interesa saber.</p>
+  <div class="note"><b>Cómo guardar una imagen:</b> mantén el dedo sobre la imagen y elige <span class="ui">Guardar en Fotos</span> (o <span class="ui">Agregar a Fotos</span>). Los nombres son de ejemplo: Ana &amp; Luis.</div>
+</div>
+
+<section class="part">
+  <div class="wrap">
+    <div class="part-head"><span class="n">1</span><h2>Fondo en 3D <span class="tag">iOS 26</span></h2></div>
+    <p class="lead">La rama grande de arriba debería quedar enfrente del reloj, y el fondo se mueve un poco cuando inclinas el celular. Funciona en iPhone 12 o más nuevo.</p>
+    <div class="shots two">
+      <div class="shot"><img src="sakura/escena_3d.jpg" alt="Sakura con una rama grande al frente, nombres Ana y Luis" loading="lazy"><span>Fondo de bloqueo 3D</span></div>
+      <div class="shot"><img src="sakura/inicio.jpg" alt="El mismo cielo rosa desenfocado, para la pantalla de inicio" loading="lazy"><span>Pantalla de inicio (va a juego)</span></div>
+    </div>
+    <ol class="steps">
+      <li>Guarda las dos imágenes en Fotos.</li>
+      <li>Ve a <span class="ui">Ajustes → Fondo de pantalla → Agregar fondo</span> y elige <span class="ui">Fotos</span>.</li>
+      <li>Escoge la de la rama grande. Abajo aparece el botón de <span class="ui">escena espacial</span> (un hexágono): actívalo.</li>
+      <li>Para el reloj, prueba un color rosa oscuro o blanco.</li>
+      <li>Al terminar, en la pantalla de inicio elige <span class="ui">Personalizar</span> → <span class="ui">Fotos</span> y pon la imagen desenfocada.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="part">
+  <div class="wrap">
+    <div class="part-head"><span class="n">2</span><h2>Un mensaje distinto cada vez</h2></div>
+    <p class="lead">Con fotos aleatorias, cada vez que tocas la pantalla de bloqueo aparece otro mensajito. La última es la sorpresa de cumpleaños.</p>
+    <div class="shots">
+      <div class="shot"><img src="sakura/aleatorio_01_nombres.jpg" alt="Ana y Luis, floreciendo juntos desde 2019" loading="lazy"><span>Ana &amp; Luis</span></div>
+      <div class="shot"><img src="sakura/aleatorio_02_te_quiero.jpg" alt="Te quiero, un poquito más que ayer" loading="lazy"><span>Te quiero</span></div>
+      <div class="shot"><img src="sakura/aleatorio_03_pienso_en_ti.jpg" alt="Pienso en ti, todo el día, todos los días" loading="lazy"><span>Pienso en ti</span></div>
+      <div class="shot"><img src="sakura/aleatorio_04_favorita.jpg" alt="Mi persona favorita, Ana" loading="lazy"><span>Mi persona favorita</span></div>
+      <div class="shot"><img src="sakura/aleatorio_05_desde_2019.jpg" alt="Desde 2019 y lo que nos falta" loading="lazy"><span>Desde 2019</span></div>
+      <div class="shot"><img src="sakura/aleatorio_06_cumple_especial.jpg" alt="Feliz cumpleaños, Ana" loading="lazy"><span>Cumpleaños (especial)</span></div>
+    </div>
+    <ol class="steps">
+      <li>Guarda las seis imágenes en Fotos.</li>
+      <li><span class="ui">Ajustes → Fondo de pantalla → Agregar fondo</span> y elige <span class="ui">Fotos aleatorias</span>.</li>
+      <li>Elige <span class="ui">Seleccionar fotos manualmente</span> y marca las seis.</li>
+      <li>En frecuencia elige <span class="ui">Al tocar</span>. Así cambia cada vez que tocas la pantalla.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="part">
+  <div class="wrap">
+    <div class="part-head"><span class="n">3</span><h2>Live Photo: se mueve al prender la pantalla <span class="tag">con app</span></h2></div>
+    <p class="lead">Es la única parte que necesita una app gratuita, solo para convertir el video. Si la vendemos, el cliente la recibiría ya convertida.</p>
+    <div class="shots two">
+      <div class="shot"><video src="sakura/live_normal.mp4" poster="sakura/aleatorio_01_nombres.jpg" muted loop playsinline controls preload="none"></video><a class="dl" href="sakura/live_normal.mp4">Abrir video normal</a></div>
+      <div class="shot"><video src="sakura/live_cumple.mp4" poster="sakura/aleatorio_06_cumple_especial.jpg" muted loop playsinline controls preload="none"></video><a class="dl" href="sakura/live_cumple.mp4">Abrir video de cumpleaños</a></div>
+    </div>
+    <ol class="steps">
+      <li>Toca <span class="ui">Abrir video</span>, luego el botón de compartir y <span class="ui">Guardar video</span>.</li>
+      <li>Instala una app gratis como <span class="ui">intoLive</span> o <span class="ui">VideoToLive</span> y convierte el video a Live Photo.</li>
+      <li>Ponlo de fondo desde <span class="ui">Ajustes → Fondo de pantalla</span>. Al prender la pantalla caen los pétalos.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="part">
+  <div class="wrap">
+    <div class="part-head"><span class="n">4</span><h2>La sorpresa cambia sola en su fecha <span class="tag">experimental</span></h2></div>
+    <p class="lead">Con la app Atajos, que ya viene en el iPhone, el fondo puede cambiar solo a la versión de cumpleaños. Esta prueba lo hace en unos minutos en lugar de esperar a la fecha.</p>
+    <ol class="steps">
+      <li>Crea dos fondos de bloqueo: uno con <span class="ui">Ana &amp; Luis</span> y otro con <span class="ui">Feliz cumpleaños</span>. Deja puesto el primero.</li>
+      <li>Abre <span class="ui">Atajos → Automatización → Nueva automatización → Hora del día</span>.</li>
+      <li>Pon una hora 3 minutos adelante, <span class="ui">Diariamente</span>, y <span class="ui">Ejecutar inmediatamente</span>.</li>
+      <li>Agrega la acción <span class="ui">Cambiar entre fondos de pantalla</span> (en inglés, <i>Switch Between Wallpapers</i>) y elige el de cumpleaños.</li>
+      <li>Bloquea el celular y espera. Si a esa hora cambia solo, funciona. Para un cliente lo dejaríamos en su fecha real.</li>
+    </ol>
+    <p class="lead" style="margin-top:16px">Si algún botón se llama distinto en tu iPhone, dinos cómo se llama y lo corregimos.</p>
+  </div>
+</section>
+
+<section class="part">
+  <div class="wrap">
+    <h2>Lo que nos interesa saber</h2>
+    <ul class="check">
+      <li>¿La rama grande quedó enfrente del reloj en 3D?</li>
+      <li>¿Los nombres se leen bien con el reloj y las notificaciones encima?</li>
+      <li>¿Qué te gustó más: el 3D, los mensajitos o el Live Photo?</li>
+      <li>¿Cambió solo el fondo con el atajo?</li>
+      <li>¿Qué modelo de iPhone y qué versión de iOS tienes? Si puedes, mándanos capturas.</li>
+    </ul>
+    <a class="zip" href="kit-sakura-iphone.zip">Descargar todo en un .zip</a>
+  </div>
+</section>
+
+<footer><div class="wrap">AVIVA · Fondos Vivos (nombre provisional) · <a href="../">Ver el catálogo completo</a></div></footer>
+</body>
+</html>

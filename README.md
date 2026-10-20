@@ -9,7 +9,7 @@ Para Android, iPhone, Windows, Mac y Linux.
 
 <img src="docs/demo.gif" alt="Los diseños corriendo en un celular" width="270">
 
-🌐 **[Ver el catálogo](https://developerjgv.github.io/aviva-catalogo/)** · ✨ **[Probar Fondos Vivos+](https://developerjgv.github.io/aviva-catalogo/vivo/)**
+🌐 **[Ver el catálogo](https://developerjgv.github.io/live-wallpaper/)** · ✨ **[Probar Fondos Vivos+](https://developerjgv.github.io/live-wallpaper/vivo/)**
 
 </div>
 
@@ -80,7 +80,7 @@ hora es, lleva la cuenta de cuánto llevan juntos y responde cuando lo tocan.
 - **El cielo de la hora real**: tarde, atardecer o noche según la hora de la computadora.
 - **Responde al tocarlo**: las luciérnagas siguen el mouse o el dedo, y cada toque suelta corazones.
 
-La demo ya funciona como fondo de escritorio de verdad: pega `https://developerjgv.github.io/aviva-catalogo/vivo/`
+La demo ya funciona como fondo de escritorio de verdad: pega `https://developerjgv.github.io/live-wallpaper/vivo/`
 en **Lively Wallpaper** (Windows), **Plash** (Mac) o un complemento de fondo web en **KDE** (Linux).
 
 ## Kit de prueba para iPhone

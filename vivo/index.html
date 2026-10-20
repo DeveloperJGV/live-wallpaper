@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AVIVA · Luciérnagas en vivo</title>
+<!-- Live wallpaper interactivo: se puede usar tal cual en Lively Wallpaper, Wallpaper Engine (tipo web) o Plash.
+     ?modo=normal|aniversario|febrero|cumple fuerza una sorpresa; sin parámetro la elige la fecha real. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Figtree:wght@400;500&display=swap">
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #050a0c; }
+  canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// ------------------------------------------------------------------ lo que se personaliza
+const PAREJA = {
+  nombres: "Fer & Pau",
+  juntosDesde: new Date(2021, 9, 18, 21, 0),   // 18 oct 2021, 9 pm
+  aniversario: [10, 18],                         // [mes, día]
+  cumple: [3, 22], cumpleDe: "Pau",
+};
+
+// ------------------------------------------------------------------ estado
+const cv = document.getElementById("c");
+const ctx = cv.getContext("2d");
+let W = 0, H = 0, DPR = 1, trees = null, glow = null;
+const params = new URLSearchParams(location.search);
+let modo = params.get("modo") || "auto";
+const pointer = { x: -1e4, y: -1e4, t: -1e9 };
+const hearts = [];
+const N = 340;
+const flies = Array.from({ length: N }, (_, i) => ({
+  x: Math.random(), y: Math.random() * 0.8, vx: 0, vy: 0,
+  f1: 0.2 + Math.random() * 0.5, f2: 0.15 + Math.random() * 0.4, p1: Math.random() * 6.3, p2: Math.random() * 6.3,
+  tw: 0.6 + Math.random() * 1.6, tp: Math.random() * 6.3, size: 0.7 + Math.random() * 0.8, tx: null, ty: null,
+}));
+let shapeKey = "";
+
+function hoyEspecial(d = new Date()) {
+  const md = [d.getMonth() + 1, d.getDate()];
+  const eq = (a) => a[0] === md[0] && a[1] === md[1];
+  if (eq(PAREJA.aniversario)) return "aniversario";
+  if (eq([2, 14])) return "febrero";
+  if (eq(PAREJA.cumple)) return "cumple";
+  return "normal";
+}
+const actual = () => (modo === "auto" ? hoyEspecial() : modo);
+const anios = () => new Date().getFullYear() - PAREJA.juntosDesde.getFullYear();
+
+const MENSAJE = {
+  normal: () => "",
+  aniversario: () => "Feliz aniversario, mi amor",
+  febrero: () => "Feliz 14 de febrero",
+  cumple: () => `Feliz cumpleaños, ${PAREJA.cumpleDe}`,
+};
+
+// ------------------------------------------------------------------ tamaño y fondo fijo
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+  // pinos en silueta, en dos capas
+  trees = document.createElement("canvas");
+  trees.width = cv.width; trees.height = cv.height;
+  const t = trees.getContext("2d");
+  t.scale(DPR, DPR);
+  const layer = (base, hMin, hMax, color, step) => {
+    t.fillStyle = color;
+    t.beginPath(); t.moveTo(0, H);
+    for (let x = -20; x < W + 40; x += step * (0.6 + Math.random() * 0.8)) {
+      const h = hMin + Math.random() * (hMax - hMin);
+      t.lineTo(x - h * 0.22, base); t.lineTo(x, base - h); t.lineTo(x + h * 0.22, base);
+    }
+    t.lineTo(W, H); t.closePath(); t.fill();
+    t.fillRect(0, base - 1, W, H - base + 1);
+  };
+  const u = Math.min(W, H);
+  layer(H * 0.93, u * 0.05, u * 0.13, "#0b1a1c", u * 0.035);
+  layer(H * 0.98, u * 0.06, u * 0.16, "#030807", u * 0.045);
+
+  // sprite de brillo de una luciérnaga
+  glow = document.createElement("canvas");
+  const g = 64; glow.width = glow.height = g;
+  const gc = glow.getContext("2d");
+  const rg = gc.createRadialGradient(g / 2, g / 2, 0, g / 2, g / 2, g / 2);
+  rg.addColorStop(0, "rgba(255,250,200,1)"); rg.addColorStop(0.12, "rgba(230,255,140,0.9)");
+  rg.addColorStop(0.35, "rgba(170,255,90,0.25)"); rg.addColorStop(1, "rgba(120,255,60,0)");
+  gc.fillStyle = rg; gc.fillRect(0, 0, g, g);
+  shapeKey = "";
+}
+
+// ------------------------------------------------------------------ figura que forman (texto o corazón)
+function shapePoints(kind) {
+  const off = document.createElement("canvas");
+  const ow = Math.round(W / 3), oh = Math.round(H / 3);
+  off.width = ow; off.height = oh;
+  const o = off.getContext("2d");
+  o.fillStyle = "#fff"; o.textAlign = "center"; o.textBaseline = "middle";
+  const cx = ow / 2, cy = oh * (W > H ? 0.3 : 0.27), u = Math.min(ow, oh);
+  const heart = (x, y, s) => {
+    o.beginPath();
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      const hx = 16 * Math.sin(a) ** 3, hy = -(13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a));
+      o.lineTo(x + hx * s, y + hy * s);
+    }
+    o.fill();
+  };
+  if (kind === "aniversario") {
+    o.font = `${Math.round(u * 0.34)}px "Great Vibes", cursive`;
+    o.fillText(`${anios()} años`, cx, cy);
+  } else if (kind === "febrero") {
+    heart(cx, cy, u * 0.012);
+  } else if (kind === "cumple") {
+    o.font = `${Math.round(Math.min(u * 0.26, ow * 0.17))}px "Great Vibes", cursive`;
+    o.fillText("Feliz cumple", cx, cy);
+  } else return null;
+  const data = o.getImageData(0, 0, ow, oh).data;
+  const pts = [];
+  for (let y = 0; y < oh; y += 1) for (let x = 0; x < ow; x += 1) if (data[(y * ow + x) * 4 + 3] > 128) pts.push([x * 3, y * 3]);
+  for (let i = pts.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [pts[i], pts[j]] = [pts[j], pts[i]]; }
+  return pts;
+}
+function updateShape() {
+  const k = actual() + "|" + W + "x" + H;
+  if (k === shapeKey) return;
+  shapeKey = k;
+  const pts = shapePoints(actual());
+  flies.forEach((f, i) => {
+    // con figura, casi todas se van a formarla; unas cuantas siguen volando libres
+    if (pts && i < N * 0.9 && pts.length) { const p = pts[i % pts.length]; f.tx = p[0]; f.ty = p[1]; }
+    else { f.tx = f.ty = null; }
+  });
+}
+
+// ------------------------------------------------------------------ interacción
+function setPointer(e) { pointer.x = e.clientX; pointer.y = e.clientY; pointer.t = performance.now(); }
+window.addEventListener("pointermove", setPointer);
+window.addEventListener("pointerdown", (e) => {
+  setPointer(e);
+  for (let i = 0; i < 7; i++) hearts.push({ x: e.clientX, y: e.clientY, vx: (Math.random() - 0.5) * 60,
+    vy: -40 - Math.random() * 70, s: 6 + Math.random() * 9, life: 0, max: 1.8 + Math.random() * 1.2 });
+});
+window.addEventListener("message", (e) => {
+  if (e.origin !== location.origin || typeof e.data?.modo !== "string") return;
+  modo = e.data.modo;
+});
+
+// ------------------------------------------------------------------ cielo según la hora real
+function sky(now) {
+  const h = now.getHours() + now.getMinutes() / 60;
+  // noche, atardecer y tarde: el mismo bosque, otra luz
+  const night = ["#02060a", "#071a1f", "#0b2a2a"], dusk = ["#1b1033", "#5a2a55", "#c9696a"], day = ["#0e2a3e", "#2f5a6a", "#7aa59a"];
+  const mix = (a, b, t) => a.map((c, i) => {
+    const pa = parseInt(c.slice(1), 16), pb = parseInt(b[i].slice(1), 16);
+    const ch = (s) => Math.round(((pa >> s) & 255) * (1 - t) + ((pb >> s) & 255) * t);
+    return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+  });
+  let cols;
+  if (h >= 20 || h < 5.5) cols = mix(night, night, 0);
+  else if (h < 7) cols = mix(night, dusk, (h - 5.5) / 1.5);
+  else if (h < 17) cols = mix(dusk, day, Math.min((h - 7) / 2, 1)).map((c, i) => (h > 15 ? mix(day, dusk, (h - 15) / 2)[i] : c));
+  else if (h < 18.5) cols = mix(day, dusk, Math.min((h - 15) / 2, 1));
+  else cols = mix(dusk, night, (h - 18.5) / 1.5);
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, cols[0]); g.addColorStop(0.6, cols[1]); g.addColorStop(1, cols[2]);
+  return g;
+}
+
+// ------------------------------------------------------------------ dibujo
+function fmt(n) { return n.toLocaleString("es-MX"); }
+function counter(now) {
+  let s = Math.max(0, Math.floor((now - PAREJA.juntosDesde) / 1000));
+  const d = Math.floor(s / 86400); s -= d * 86400;
+  const h = Math.floor(s / 3600); s -= h * 3600;
+  const m = Math.floor(s / 60); s -= m * 60;
+  return `${fmt(d)} días, ${h} h, ${m} min y ${s} s juntos`;
+}
+
+function move(f, dt, ts, near, u) {
+  let ax, ay;
+  if (f.tx !== null) {
+    const jx = Math.sin(ts * f.f1 + f.p1) * 2.5, jy = Math.cos(ts * f.f2 + f.p2) * 2.5;
+    ax = (f.tx + jx - f.x * W) * 14; ay = (f.ty + jy - f.y * H) * 14;
+  } else {
+    ax = Math.sin(ts * f.f1 + f.p1) * 30 + Math.sin(ts * 0.13 + f.p2 * 2) * 18;
+    ay = Math.cos(ts * f.f2 + f.p2) * 22 + (f.y > 0.82 ? -40 : 0) + (f.y < 0.05 ? 40 : 0);
+    ax += f.x < 0.02 ? 40 : f.x > 0.98 ? -40 : 0;
+  }
+  if (near) {   // giran alrededor del mouse o del dedo
+    const dx = pointer.x - f.x * W, dy = pointer.y - f.y * H, d = Math.hypot(dx, dy) + 1;
+    if (d < u * 0.35) { const k = (1 - d / (u * 0.35)) * 260; ax += (dx / d) * k * 0.5 - (dy / d) * k; ay += (dy / d) * k * 0.5 + (dx / d) * k; }
+  }
+  f.vx = (f.vx + ax * dt) * (f.tx !== null ? 0.86 : 0.97);
+  f.vy = (f.vy + ay * dt) * (f.tx !== null ? 0.86 : 0.97);
+  f.x += (f.vx * dt) / W; f.y += (f.vy * dt) / H;
+}
+
+// ?warm=N adelanta N cuadros de simulación (para capturas de prueba)
+let warm = +params.get("warm") || 0;
+let last = performance.now();
+function frame(t) {
+  const dt = Math.min((t - last) / 1000, 0.05); last = t;
+  const now = new Date();
+  updateShape();
+  ctx.globalCompositeOperation = "source-over";
+  ctx.fillStyle = sky(now); ctx.fillRect(0, 0, W, H);
+
+  ctx.drawImage(trees, 0, 0, W, H);
+
+  // texto: nombres, mensaje del día y contador
+  const u = Math.min(W, H), landscape = W > H;
+  const ny = H * (landscape ? 0.58 : 0.6);
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.shadowColor = "rgba(200,255,140,0.55)"; ctx.shadowBlur = u * 0.03;
+  ctx.fillStyle = "#f4ffe0";
+  let fs = Math.round(u * (landscape ? 0.13 : 0.15));
+  ctx.font = `${fs}px "Great Vibes", cursive`;
+  const tw = ctx.measureText(PAREJA.nombres).width;
+  if (tw > W * 0.86) { fs = Math.floor(fs * W * 0.86 / tw); ctx.font = `${fs}px "Great Vibes", cursive`; }
+  ctx.fillText(PAREJA.nombres, W / 2, ny);
+  ctx.shadowBlur = 0;
+  const msg = MENSAJE[actual()]();
+  ctx.font = `500 ${Math.round(u * 0.032)}px Figtree, system-ui, sans-serif`;
+  ctx.fillStyle = "rgba(240,255,220,0.85)";
+  if (msg) ctx.fillText(msg.toUpperCase().split("").join(" "), W / 2, ny + u * 0.11);
+  ctx.font = `400 ${Math.round(u * 0.026)}px Figtree, system-ui, sans-serif`;
+  ctx.fillStyle = "rgba(220,240,210,0.7)";
+  ctx.fillText(counter(now), W / 2, ny + u * (msg ? 0.165 : 0.11));
+
+  // luciérnagas
+  ctx.globalCompositeOperation = "lighter";
+  const ts = t / 1000, near = t - pointer.t < 2500;
+  for (let r = 0; r < warm; r++) for (const f of flies) move(f, 1 / 60, ts - (warm - r) / 60, false, u);
+  warm = 0;
+  for (const f of flies) {
+    move(f, dt, ts, near, u);
+    const b = 0.35 + 0.65 * Math.max(0, Math.sin(ts * f.tw + f.tp)) ** 2;
+    const s = u * (f.tx !== null ? 0.02 : 0.028) * f.size * (0.7 + b * 0.5);
+    ctx.globalAlpha = Math.min(1, b * (f.tx !== null ? 1 : 0.9));
+    ctx.drawImage(glow, f.x * W - s / 2, f.y * H - s / 2, s, s);
+  }
+  ctx.globalAlpha = 1;
+
+  // corazones al tocar
+  ctx.globalCompositeOperation = "source-over";
+  for (let i = hearts.length - 1; i >= 0; i--) {
+    const h = hearts[i];
+    h.life += dt; h.x += h.vx * dt; h.y += h.vy * dt; h.vy -= 10 * dt;
+    if (h.life > h.max) { hearts.splice(i, 1); continue; }
+    ctx.globalAlpha = Math.sin((h.life / h.max) * Math.PI) * 0.9;
+    ctx.fillStyle = "#ff8fa8";
+    ctx.font = `${h.s * (u / 500)}px system-ui, sans-serif`;
+    ctx.fillText("♥", h.x, h.y);
+  }
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(frame);
+}
+
+// dentro de la página de AVIVA, deja hacer scroll con el dedo encima
+if (params.has("embed")) cv.style.touchAction = "pan-y";
+resize();
+window.addEventListener("resize", resize);
+document.fonts?.ready.then(() => { shapeKey = ""; });
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
